@@ -11,6 +11,7 @@ class LoginPage():
 		masterFrame.geometry("500x300")
 		self.frame = masterFrame
 		self.userManager = userManager
+		self.frame.bind('<Return>', lambda event: self.login())
 
 		Label(self.frame, text = "Login").pack()
 		Label(self.frame, text = "Username").pack()
@@ -18,15 +19,15 @@ class LoginPage():
 		self.passwordEntry = Entry(self.frame, show = "*")
 		self.usernameEntry.pack()
 		self.passwordEntry.pack()
-		Button(self.frame, text = "Login", command = self.login).pack()
-		Button(self.frame, text = "New User?", command = self.signUp).pack()
+		loginButton = Button(self.frame, text = "Login", command = self.login).pack()
+		Button(self.frame, text = "Create Account", command = self.signUp).pack()
 
 	def login(self):
 		if self.userManager.validateUser(self.usernameEntry.get(), self.passwordEntry.get()):
 			print "successful authentication"
 			self.frame.destroy()
 		else:
-			print "Invalid username or password"
+			tkMessageBox.showinfo("ERROR","Invalid username or password")
 
 	def signUp(self):
 		self.signUpPage = tk.Toplevel(self.frame)
