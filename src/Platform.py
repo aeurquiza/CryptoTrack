@@ -22,7 +22,7 @@ class CryptoGUI():
     THEME_COLOR = "#7befb2"
 
     def __init__(self, master_frame, user_manager):
-        masterFrame.geometry("1000x600")
+        master_frame.geometry("1000x600")
 
         #CONFIGS
         apiVersion = '2017-08-07'
@@ -42,9 +42,6 @@ class CryptoGUI():
         self.graph_frame = Tkinter.Frame( self.frame, width = 500, height = 500)
         self.graph_frame.grid( column = 5, row = 0)
 
-        #Plot Generator
-        self.plot_generator = PlotGenerator.PlotGenerator(self.graph_frame)
-
         #Threads
         self.update_pricing_thread = threading.Thread( target = self.update_prices_thread_wrapper, args = () )
         self.update_pricing_thread.daemon = True
@@ -52,6 +49,9 @@ class CryptoGUI():
         #Clients
         self.client =  CoinbaseClient( apiKey , apiVal , api_version = apiVersion )
         self.cc_client = CryptoCompareClient.CryptoCompareClient()
+
+        #Plot Generator
+        self.plot_generator = PlotGenerator.PlotGenerator(self.graph_frame, self.cc_client)
 
         self.cryptos_tracking = [Crypto('BTC',0),Crypto('USDT',0),Crypto('TRX',0),Crypto('XMR',0),Crypto('DASH',0)]  
         self.ticker_chart_labels = {}
@@ -80,7 +80,7 @@ class CryptoGUI():
         Tkinter.Label(self.ticker_frame, bg = self.THEME_COLOR, text = "Enter ticker to remove:").grid( row = self.remove_ticker_entry_position[0],  column = self.remove_ticker_entry_position[1])
         self.remove_ticker_entry =  Entry(self.ticker_frame)
         self.remove_ticker_entry.grid(row = self.remove_ticker_entry_position[0]+1, column = self.remove_ticker_entry_position[1])
-        Button(self.ticker_frame, text="Remove Ticker", command=self.remove_crypto).grid( row = self.remove_ticker_entry_position[0]+1, column = self.remove_ticker_entry_position[1]+1)
+#        Button(self.ticker_frame, text="Remove Ticker", command=self.remove_crypto).grid( row = self.remove_ticker_entry_position[0]+1, column = self.remove_ticker_entry_position[1]+1)
 
         #Cryptos Tracking
         Tkinter.Label(self.ticker_frame, bg = self.THEME_COLOR, font='Helvetica 12 bold', text = "            Cryptos").grid( row = self.tracking_cryptos_chart[0], column = self.tracking_cryptos_chart[1] )
@@ -97,7 +97,8 @@ class CryptoGUI():
                                                          command = self.generate_plot ).grid( column = self.graph_position[0], row = self.graph_position[1], sticky = 'n' )
 
     def generate_plot(self):
-        self.plot_generator.generate_plot(self.graph_ticker_selector_var).get_tk_widget().grid( row = self.graph_position[0]+1, column = self.graph_position[1], pady = (20,0), sticky = 'n')
+        self.plot_generator.generate(self.graph_ticker_selector_var.get(), self.currency_selection_var.get(), 
+                                                   60 ).get_tk_widget().grid( row = self.graph_position[0]+1, column = self.graph_position[1], pady = (20,0), sticky = 'n')
 
     def write_quotes(self):
         for crypto in self.cryptos_tracking:
@@ -179,6 +180,7 @@ class CryptoGUI():
             props["TickerPrice"].grid( row = self.tracking_cryptos_chart[0]+1+ self.quotes_position_counter, column  = self.tracking_cryptos_chart[1]+1)
             self.quotes_position_counter+=1
 
-    def change_currency(self, *args):    
+    def change_currency(self, *args):
+        self.generate_plot()
         self.currency_selection = self.currency_selection_var.get()
 

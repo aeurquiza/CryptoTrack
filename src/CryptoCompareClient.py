@@ -16,7 +16,7 @@ class CryptoCompareClient():
 		request_url = "https://min-api.cryptocompare.com/data/histoday?fsym=%s&tsym=%s&limit=%s&e=CCCAGG"%(crypto, currency, limit)
 		response = self.make_request(request_url)
 		if response != None:
-			return _extract_historical_prices(response['Data'])
+			return self._extract_historical_prices(response['Data'])
 		return None
 
 
@@ -27,7 +27,7 @@ class CryptoCompareClient():
 		else:
 			return response
 
-	def __extract_historical_prices(ticker_list):
+	def _extract_historical_prices(self, ticker_list):
 		if ticker_list != None:
 			return [ record['close'] for record in ticker_list ]
 		return None
